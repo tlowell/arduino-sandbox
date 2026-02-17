@@ -98,13 +98,13 @@ int ycor3 = vertical_spacing + box_size + vertical_spacing + box_size + vertical
   Serial.println("Hello Touch Squares example");
 
   gfx->begin();
-  gfx->setRotation(LCD_ROTATION); // 0 is scross the narrow, reversed. 1 is across the wide, reversed, 3 is acorss wide other side. reeverses/
+  gfx->setRotation(LCD_ROTATION);
   gfx->displayOn();
   gfx->fillScreen(ST77XX_BLACK);
   //
   // There's a bug where the red and blue squares are transposed dispite the touch coordinates looking
   // correct when displayed with gfx in gfxPrintFourCorners. Haven't tracked this bug down
-  // yet. Cheat and swpa them here for drawing. The touch input in loop() will be correct.
+  // yet. Cheat and swap them here for drawing. The touch input in loop() will be correct.
   //
   gfx->fillRect(xcor, ycor3, box_size, box_size, ST77XX_RED);//bug: ycor1 should work
   gfx->fillRect(xcor, ycor2, box_size, box_size, ST77XX_GREEN);
