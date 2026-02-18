@@ -194,7 +194,7 @@ if (rotation_setting == LCD_LANDSCAPE_USB_LEFT){ // landscape mode
 n_chars = 13; // eg "150, 120 (LL)"
 string_length = char_width * n_chars;
 if (Serial) Serial.println("rotation = " + String(rotation_setting));
-// don't don't display the margin or string_length ub effect. drop it from the print math. we really want to see the screen size being used. 
+// don't use the margin or string_length the print math. we want to see the screen size being used. 
 
 // upper left  (0, 0) 
 gfx->setCursor(0 + margin , 0 + margin); //  (0, 0). upper left.

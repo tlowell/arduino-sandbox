@@ -7,6 +7,25 @@
  
   For the Waveshare ESP32-S3-TOUCH-LCD-1.47 board only due to specific pin usage.
 
+  This sketch emulates the sketch written by YouTuber Volos that he wrote in this video: https://www.youtube.com/watch?v=oPAOMTf5dVE
+  It displays "hello world" as well as the x, y coorinates of display touches.
+  
+  This sketch is for the ESP32-S3-TOUCH-LCD-1.47. Volos' was for the ESP32-S3-TOUCH-LCD-2. They
+  are different boards with different displays and required these modifications to his script:
+
+    1. The ESP32-S3-TOUCH-LCD-1.47 has a different set of LCD and TFT pins for the display.
+    2. This board has an IPS display (not capacitive touch) requiring a different touch library.
+    3. This display is 320x173, not 320x240, requiring different math for the squares spacing.
+    4. The color literals (BLACK, GREEN, etc.) resulted in compile time errors. To avoid this, 
+       Adafruit_ST7789.h is includeded and the ST77XX_xxx color palette is used. 
+
+  Additionally, I added two helper functions so the orientation of the board can be changed from
+  portrait to landscape.
+
+    gfxPrintFourCorners - writes the display coordinates to all four corners of the display so the
+                          mapping of screen orientation to coordinates can be easily debugged.
+    transformTouchCoordinates - maps the x , y   touch coordinates to new values based on screen orientation.              
+
   Arduino IDE settings:
     Board: ESP32S2 Dev Module
   	Under Arduino Tools also set…
@@ -15,17 +34,12 @@
 		  Partitian -> 16 MB (3MB…
 		  PSRAM -> OPI
 
-
-
 */
-
 
 #include <Arduino_GFX_Library.h>
 #include <Adafruit_ST7789.h>  // Add back the TFT library, but no TFT objects yet
-
 #include <lvgl.h>
-#include <esp_lcd_touch_axs5106l.h>
-//#include <bb_captouch.h> // my board is IPS, not cap touch
+#include <esp_lcd_touch_axs5106l.h> // this board is IPS, not cap touch so no bb_captouch library.
 
 void gfxPrintFourCorners(int width, int height, int rotation_setting, int char_height, int char_width, int margin);
 void transformTouchCoordinates(int &x, int &y);
@@ -107,20 +121,17 @@ void loop() {
       gfx->setCursor(50,50);
       Serial.println("\n" + String(x) + "," + String(y));
       // transform x and y for my board and it's orientation in format of (0,0) in upper left
-      transformTouchCoordinates(x, y);
+      transformTouchCoordinates(x, y); // map touch coords to current display orientation
       Serial.println(String(x) + "," + String(y));
       gfx->print(String(x) + ", " + String(y));
     }
 }
 
-void transformTouchCoordinates(int &x, int &y)
+void transformTouchCoordinates(int &x, int &y){
 // transform x and y for my board and it's orientation in format of (0,0) in upper left
-
-{
     if (LCD_ROTATION == LCD_PORTRAIT_USB_TOP) {
         x = LCD_H_RES + x;
         y = LCD_V_RES - y;
-
     } else if (LCD_ROTATION == LCD_PORTRAIT_USB_BOTTOM) {
 
         // currently no transform
@@ -129,7 +140,6 @@ void transformTouchCoordinates(int &x, int &y)
         int temp = x;
         x = LCD_V_RES - y;
         y = temp - LCD_H_RES + 20;
-
     } else if (LCD_ROTATION == LCD_LANDSCAPE_USB_RIGHT) {
         int temp = x;
         x = y;
@@ -159,7 +169,7 @@ if (rotation_setting == 5){ // landscape mode
 n_chars = 13; // eg "150, 120 (LL)"
 string_length = char_width * n_chars;
 if (Serial) Serial.println("rotation = " + String(rotation_setting));
-// don't don't display the margin or string_length ub effect. drop it from the print math. we really want to see the screen size being used. 
+// don't use the margin or string_length the print math. we want to see the screen size being used. 
 
 // upper left  (0, 0) 
 gfx->setCursor(0 + margin , 0 + margin); //  (0, 0). upper left.
