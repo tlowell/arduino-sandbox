@@ -26,7 +26,7 @@
     transformTouchCoordinates - maps the x , y   touch coordinates to new values based on screen orientation.              
 
   Arduino IDE settings:
-    Board: ESP32S2 Dev Module
+    Board: ESP32S3 Dev Module
   	Under Arduino Tools also set…
 		  USB CDC On Booot "enabled"
 		  Flash size -> 16 MB
