@@ -1,6 +1,8 @@
 # arduino-sandbox
 Some of my Arduino code that may be useful to others. 
 
+[waveshare-esp32-s3-touch-lcd-1.47](waveshare/waveshare-esp32-s3-touch-lcd-1.47/)
+
 ## License
 
 This repository is released under the MIT License.
