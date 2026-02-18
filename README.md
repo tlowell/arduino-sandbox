@@ -1,9 +1,11 @@
 # arduino-sandbox
-Some of my Arduino code that may be useful to others. 
+A collection of Arduino sketches that may be useful to others. 
 
-The [waveshare](waveshare) folder is organized by board types using the  board nomenclature found on ther site. These boards require their own sketches to support their unique pin outs,  differing touch technology, etc.
+The [waveshare](waveshare)￼folder is organized by board type using the model naming convention found on the Waveshare website (e.g., esp32-s3-touch-lcd-1.47).
+These boards require their own sketches to support unique pinouts, differing touch controllers, display variants, etc.
 
-The code in [waveshare-esp32-s3-touch-lcd-1.47](waveshare/waveshare-esp32-s3-touch-lcd-1.47/) emulates the example made by YouTuber Volus in this [video](https://www.youtube.com/watch?v=oPAOMTf5dVE&t=54s) but customized for this board. 
+The code in [waveshare-esp32-s3-touch-lcd-1.47](waveshare/waveshare-esp32-s3-touch-lcd-1.47/) emulates the example created by YouTuber Volos Projects in this [video](https://www.youtube.com/watch?v=oPAOMTf5dVE&t=54s), but customized for this specific board.
+
 
 ## License
 
