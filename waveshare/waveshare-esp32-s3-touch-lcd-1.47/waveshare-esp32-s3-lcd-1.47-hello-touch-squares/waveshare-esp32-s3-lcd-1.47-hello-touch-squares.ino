@@ -5,7 +5,7 @@
   Copyright (c) 2026 Thomas Lowell
   Licensed under the MIT License.
  
-  For the Waveshare ESP32-S3-TOUCH-LCD-1.47 board only due to specific pin usage.
+  For the Waveshare ESP32-S3-TOUCH-LCD-1.47 board only, due to specific pin usage.
 
   This sketch emulates the sketch written by YouTuber Volos that he wrote in this video: https://www.youtube.com/watch?v=oPAOMTf5dVE
 
@@ -110,12 +110,8 @@ int ycor3 = vertical_spacing + box_size + vertical_spacing + box_size + vertical
   gfx->fillRect(xcor, ycor2, box_size, box_size, ST77XX_GREEN);
   gfx->fillRect(xcor, ycor1, box_size, box_size, ST77XX_BLUE); //bug: ycor3 should work
 
-  Serial.println("red =" + String(ycor1) + ", expected 20");
-  Serial.println("green =" + String(ycor2) + ", expected 120");
-  Serial.println("blue =" + String(ycor3) + ", expected 220");
-
   // Uncomment this call for help debugging screen coordinates
-  gfxPrintFourCorners(LCD_H_RES, LCD_V_RES, LCD_ROTATION, CHAR_HEIGHT, CHAR_WIDTH, MARGIN);
+  // gfxPrintFourCorners(LCD_H_RES, LCD_V_RES, LCD_ROTATION, CHAR_HEIGHT, CHAR_WIDTH, MARGIN);
 
   analogWrite(LCD_BL, 150);
   Wire.begin(TP_SDA, TP_SCL);
@@ -153,7 +149,7 @@ void loop() {
         }
       }
     // Uncomment this call for help debugging screen coordinates 
-    gfx->print(String(x) + ", " + String(y));
+    // gfx->print(String(x) + ", " + String(y));
     }
 }
 
