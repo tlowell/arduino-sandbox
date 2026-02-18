@@ -18,7 +18,7 @@
     4. The color literals (BLACK, GREEN, etc.) resulted in compile time errors. To avoid this, 
        Adafruit_ST7789.h is includeded and the ST77XX_xxx color palette is used. 
 
-  Additionally, I added two helper functions so the orientation of the board can be changed from
+  Additionally, two helper functions were added so the orientation of the board can be changed from
   portrait to landscape.
 
     gfxPrintFourCorners - writes the display coordinates to all four corners of the display so the
@@ -32,7 +32,6 @@
 		  Flash size -> 16 MB
 		  Partitian -> 16 MB (3MB…
 		  PSRAM -> OPI
-
 */
 
 #include <Arduino_GFX_Library.h>
