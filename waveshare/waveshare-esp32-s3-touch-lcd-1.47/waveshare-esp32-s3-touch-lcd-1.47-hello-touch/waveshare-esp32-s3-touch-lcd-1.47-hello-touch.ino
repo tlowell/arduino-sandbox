@@ -1,14 +1,15 @@
 /*
-  waveshare-esp32-s3-lcd-1.47-hello-touch-squares.ino
+  waveshare-esp32-s3-touch-lcd-1.47-hello-touch.ino
   Source: github.com/tlowell/arduino-sandbox
  
   Copyright (c) 2026 Thomas Lowell
   Licensed under the MIT License.
  
-  For the Waveshare ESP32-S3-TOUCH-LCD-1.47 board only, due to specific pin usage.
+  For the Waveshare ESP32-S3-TOUCH-LCD-1.47 board only due to specific pin usage.
 
   This sketch emulates the sketch written by YouTuber Volos that he wrote in this video: https://www.youtube.com/watch?v=oPAOMTf5dVE
-
+  It displays "hello world" as well as the x, y coorinates of display touches.
+  
   This sketch is for the ESP32-S3-TOUCH-LCD-1.47. Volos' was for the ESP32-S3-TOUCH-LCD-2. They
   are different boards with different displays and required these modifications to his script:
 
@@ -35,14 +36,13 @@
 */
 
 #include <Arduino_GFX_Library.h>
-#include <Adafruit_ST7789.h>
+#include <Adafruit_ST7789.h>  // Add back the TFT library, but no TFT objects yet
 #include <lvgl.h>
 #include <esp_lcd_touch_axs5106l.h> // this board is IPS, not cap touch so no bb_captouch library.
 
 void gfxPrintFourCorners(int width, int height, int rotation_setting, int char_height, int char_width, int margin);
 void transformTouchCoordinates(int &x, int &y);
 
-// screen orientation
 #define LCD_PORTRAIT_USB_BOTTOM 4
 #define LCD_LANDSCAPE_USB_LEFT 5
 #define LCD_PORTRAIT_USB_TOP 6
@@ -51,7 +51,7 @@ void transformTouchCoordinates(int &x, int &y);
 
 #define LCD_TEXT_SIZE 1
 #define LCD_H_RES 172 // portrait mode. so we flip these when in landscape mode
-#define LCD_V_RES 320 // ESP32-S3-TOUCH-LCD-1.47 display is 320 x 172
+#define LCD_V_RES 320
 
 // LCD pins for this board (see schematic on Waveshare wiki)
 #define LCD_BL 46 // verified 
@@ -63,7 +63,7 @@ void transformTouchCoordinates(int &x, int &y);
 #define LCD_DC 45
 #define LCD_BL 46
 
-//Touch Pins for this board (see schematic on Waveshare wiki)
+//Touch Pins for this board
 #define TP_SDA 42
 #define TP_SCL 41
 #define TP_RST 47
@@ -72,19 +72,11 @@ void transformTouchCoordinates(int &x, int &y);
 Arduino_DataBus *bus = new Arduino_ESP32SPI(LCD_DC, LCD_CS, LCD_SCL, LCD_SDA, LCD_MISO); 
 Arduino_GFX *gfx = new Arduino_ST7789(bus, LCD_RST, LCD_ROTATION, false /* IPS */, LCD_H_RES, LCD_V_RES, 34, 0, 34, 0);
 
-/* for drawing in four corners  */
+/* for drawing in four corners test */
 #define CHAR_HEIGHT LCD_TEXT_SIZE * 5
 #define CHAR_WIDTH LCD_TEXT_SIZE * 6
 #define MARGIN 10 // boarder around display to avoid clipping
-//
-//Volos's 3 colored boxes from his you tube video (How to Program an ESP32 DEv Board (Part 2) - Touch Inputs Tutorial)
-int box_size = 80;
-int xcor = (LCD_H_RES - box_size) / 2; // Volos used 80 (1/3 of horizonal dimension. because his display is 240. Mine is 172. Keeping box 80 we have (172-80)/2 = 46
-int vertical_spacing  = 20; 
-int ycor1 = vertical_spacing; // 20
-int ycor2 = vertical_spacing + box_size + vertical_spacing; // 120
-int ycor3 = vertical_spacing + box_size + vertical_spacing + box_size + vertical_spacing; // 220
- 
+
  void setup() {
   //lcd reset
   pinMode(LCD_RST, OUTPUT);
@@ -94,23 +86,19 @@ int ycor3 = vertical_spacing + box_size + vertical_spacing + box_size + vertical
 
   Serial.begin(115200);
   delay(100);
-  Serial.println("Hello Touch Squares example");
+  Serial.println("Hello Touch example");
 
   gfx->begin();
-  gfx->setRotation(LCD_ROTATION);
+  gfx->setRotation(LCD_ROTATION); // 0 is scross the narrow, reversed. 1 is across the wide, reversed, 3 is acorss wide other side. reeverses/
   gfx->displayOn();
   gfx->fillScreen(ST77XX_BLACK);
-  //
-  // There's a bug where the red and blue squares are transposed dispite the touch coordinates looking
-  // correct when displayed with gfx in gfxPrintFourCorners. Haven't tracked this bug down
-  // yet. Cheat and swap them here for drawing. The touch input in loop() will be correct.
-  //
-  gfx->fillRect(xcor, ycor3, box_size, box_size, ST77XX_RED);//bug: ycor1 should work
-  gfx->fillRect(xcor, ycor2, box_size, box_size, ST77XX_GREEN);
-  gfx->fillRect(xcor, ycor1, box_size, box_size, ST77XX_BLUE); //bug: ycor3 should work
 
-  // Uncomment this call for help debugging screen coordinates
-  // gfxPrintFourCorners(LCD_H_RES, LCD_V_RES, LCD_ROTATION, CHAR_HEIGHT, CHAR_WIDTH, MARGIN);
+  gfx->setTextSize(LCD_TEXT_SIZE);
+  gfx->setCursor(10,100);
+  gfx->setTextColor(ST77XX_GREEN);
+  gfx->print("Hello World!");
+
+  gfxPrintFourCorners(LCD_H_RES, LCD_V_RES, LCD_ROTATION, CHAR_HEIGHT, CHAR_WIDTH, MARGIN);
 
   analogWrite(LCD_BL, 150);
   Wire.begin(TP_SDA, TP_SCL);
@@ -125,35 +113,21 @@ void loop() {
 
    bsp_touch_read();
    touchpad_pressed = bsp_touch_get_coordinates(&touch_data);
-    if (touchpad_pressed && (x != touch_data.coords[0].x || y != touch_data.coords[0].y)) { 
-      // one of the two coordinates changed so do something...
+    if (touchpad_pressed & x != touch_data.coords[0].x) {
       x = touch_data.coords[0].x;
       y = touch_data.coords[0].y;
-      gfx->fillRect(15,20, 30,20, ST77XX_BLACK );
-      gfx->setCursor(15,30);
-      // Serial.println("\n" + String(x) + "," + String(y)); For debugging orientation. Check coordinates.
+      gfx->fillRect(50,40,100,60, ST77XX_BLACK );
+      gfx->setCursor(50,50);
+      Serial.println("\n" + String(x) + "," + String(y));
+      // transform x and y for my board and it's orientation in format of (0,0) in upper left
       transformTouchCoordinates(x, y); // map touch coords to current display orientation
-      // Serial.println(String(x) + "," + String(y)); // For debugging orientation. Did we change then for this orientation?
-      /*
-          Check if touch cordinates are on a colored box.
-      */
-      if (x>= xcor && x <= xcor + box_size){
-        // we * may * have touched a box. Gotta check y
-        if (y >= ycor1 && y <= ycor1 + box_size){ // red
-           gfx->print("RED");
-        } else if (y >= ycor2 && y <= ycor2 + box_size) { // green
-           gfx->print("GREEN");
-        }  else if (y >= ycor3 && y <= ycor3 + box_size) {// blue 
-           gfx->print("BLUE");
-        }
-      }
-    // Uncomment this call for help debugging screen coordinates 
-    // gfx->print(String(x) + ", " + String(y));
+      Serial.println(String(x) + "," + String(y));
+      gfx->print(String(x) + ", " + String(y));
     }
 }
 
-void transformTouchCoordinates(int &x, int &y)
-{
+void transformTouchCoordinates(int &x, int &y){
+// transform x and y for my board and it's orientation in format of (0,0) in upper left
     if (LCD_ROTATION == LCD_PORTRAIT_USB_TOP) {
         x = LCD_H_RES + x;
         y = LCD_V_RES - y;
@@ -175,17 +149,18 @@ void transformTouchCoordinates(int &x, int &y)
 void gfxPrintFourCorners(int width, int height, int rotation_setting, int char_height, int char_width, int margin){
   /*
      Test function that prints display coordinate in all four corners.  Origin (0,0) assumed to be upper left
-     The purpose is to visually verify assumptions match what the code is seeing.
+     The purpose is to visually verify assumptions match coded coordinates.
 
      - example:   0,0    (UL)  240,0   (UR)  
                   0, 320 (LL)  240,320 (LR)
 
      - width and height are the physical display dimensions (but could be smaller)
-     - margin is the boarder inside the physical display to not be drawn on to avoid clipping.
+     - margin is the boarder inside the physical display to not be drawn on. 
      - char_height and char_width are to accomodate the size of the string we're printing so it doesn't run off.
+    
   */
 int string_length, n_chars, temp;
-if (rotation_setting == LCD_LANDSCAPE_USB_LEFT){ // landscape mode 
+if (rotation_setting == 5){ // landscape mode 
   temp = width;
   width = height;
   height = temp;

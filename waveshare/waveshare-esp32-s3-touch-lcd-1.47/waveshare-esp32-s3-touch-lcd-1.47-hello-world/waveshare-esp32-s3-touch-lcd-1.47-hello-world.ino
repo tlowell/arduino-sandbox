@@ -1,5 +1,5 @@
 /*
-  waveshare-esp32-s3-lcd-1.47-hello-world.ino
+  waveshare-esp32-s3-touch-lcd-1.47-hello-world.ino
   Source: github.com/tlowell/arduino-sandbox
  
   Copyright (c) 2026 Thomas Lowell
